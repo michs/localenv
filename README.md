@@ -1,6 +1,8 @@
 Localenv
 ========
 
+Alternative implementation of Python virtual environments.
+
 Usage
 -----
     As command:         localpyenv.py [options] directory
