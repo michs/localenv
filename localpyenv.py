@@ -9,14 +9,15 @@ import os
 import site
 import stat
 import sys
+import types
 
+EXTRA_SITE_PACKAGES = False
 SYSTEM_SITE_PACKAGES = False
 USER_SITE_PACKAGES = False
 
 
 def process_commandline():
-    global SYSTEM_SITE_PACKAGES
-    global USER_SITE_PACKAGES
+    global EXTRA_SITE_PACKAGES, SYSTEM_SITE_PACKAGES, USER_SITE_PACKAGES
 
     parser = optparse.OptionParser(usage="%prog [options] directory")
     parser.add_option(
@@ -68,28 +69,54 @@ def create_envscripts(path):
         print >>sys.stderr, "Failed to create ", path
     return success
 
-def getsitepackages(userpackages):
-    ret = []
-    defpath = "%s/lib/python%s.%s" % (sys.prefix,
-                                      sys.version_info.major,
-                                      sys.version_info.minor)
-    for dir in sys.path:
-        if (not dir.startswith(defpath)
-            and not dir == os.path.dirname(sys.argv[0])
-            and not dir in userpackages):
-            ret.append(dir)
-    return ret
+# def getsitepackages(userpackages):
+#     ret = []
+#     defpath = "%s/lib/python%s.%s" % (sys.prefix,
+#                                       sys.version_info.major,
+#                                       sys.version_info.minor)
+#     for dir in sys.path:
+#         if (not dir.startswith(defpath)
+#             and not dir == os.path.dirname(sys.argv[0])
+#             and not dir in userpackages):
+#             ret.append(dir)
+#     return ret
+
+def ensure_list(arg):
+    if type(arg) != types.ListType:
+        if arg:
+            arg =  [ arg ]
+        else:
+            arg = []
+    return arg
 
 def create_sitecustomize(path):
-    user_sitepacks = site.getusersitepackages()
-    sitepacks = getsitepackages(user_sitepacks)
+    extra_sitepacks = []
+    sitepacks = ensure_list(site.getsitepackages())
+    user_sitepacks = ensure_list(site.getusersitepackages())
+
     fp = open("bin/sitecustomize.py", "w")
+
     print >>fp, 'import os, site, sys'
-    print >>fp, 'sitepacks = ["' + '", "'.join(sitepacks) + '"]'
-    print >>fp, 'user_sitepacks = ["' + user_sitepacks + '"]'
+
+    print >>fp, 'EXTRA_SITE_PACKAGES = ' + str(EXTRA_SITE_PACKAGES)
     print >>fp, 'SYSTEM_SITE_PACKAGES = ' + str(SYSTEM_SITE_PACKAGES)
     print >>fp, 'USER_SITE_PACKAGES = ' + str(USER_SITE_PACKAGES)
+
+    if extra_sitepacks:
+        print >>fp, 'extra_sitepacks = ["' + '", "'.join(extra_sitepacks) + '"]'
+    else:
+        print >>fp, 'extra_sitepacks = [ ]'
+    if sitepacks:
+        print >>fp, 'sitepacks = ["' + '", "'.join(sitepacks) + '"]'
+    else:
+        print >>fp, 'sitepacks = [ ]'
+    if user_sitepacks:
+        print >>fp, 'user_sitepacks = ["' + '", "'.join(user_sitepacks) + '"]'
+    else:
+        print >>fp, 'user_sitepacks = [ ]'
+
     print >>fp, site_script
+
     fp.close()
 
 # Body for "bin/activate.sh"
@@ -175,10 +202,7 @@ def list_remove(l, dir):
         else:
             i = i + 1
 
-for dir in user_sitepacks:
-    list_remove(sys.path, dir)
-
-for dir in sitepacks:
+for dir in extra_sitepacks+sitepacks+user_sitepacks:
     list_remove(sys.path, dir)
 
 if USER_SITE_PACKAGES:
@@ -187,14 +211,12 @@ if USER_SITE_PACKAGES:
 if SYSTEM_SITE_PACKAGES:
     for dir in sitepacks:
         site.addsitedir(dir)
+if EXTRA_SITE_PACKAGES:
+    for dir in user_sitepacks:
+        site.addsitedir(dir)
 """
 
 if __name__ == '__main__':
-
-    print sys.argv 
-    print os.getcwd()
-    print sys.path
-
     path = process_commandline()
     if path:
         path = os.path.abspath(path)
