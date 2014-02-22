@@ -70,8 +70,12 @@ def create_envscripts(path):
 
 def getsitepackages(userpackages):
     ret = []
+    defpath = "%s/lib/python%s.%s" % (sys.prefix,
+                                      sys.version_info.major,
+                                      sys.version_info.minor)
     for dir in sys.path:
-        if ((dir.endswith("site-packages") or dir.endswith("site-python"))
+        if (not dir.startswith(defpath)
+            and not dir == os.path.dirname(sys.argv[0])
             and not dir in userpackages):
             ret.append(dir)
     return ret
@@ -143,21 +147,20 @@ create_script = """
 mkdir -p ${ENV_ROOT}/lib/python${PY_VERSION}/site-packages
 mkdir -p ${ENV_ROOT}/include
 
-find ${PY_SYSPREFIX}/bin -depth 1 \\
-         \! -name activate.sh \! -name create_environment.sh \\
-         \! -name sitecustomize.py \\
-         -exec ln -fhs {} ${ENV_ROOT}/bin \;
+find ${PY_SYSPREFIX}/bin -maxdepth 1 \\
+         -name python\* \\
+         -exec ln -fns {} ${ENV_ROOT}/bin \;
 
-find ${PY_SYSPREFIX}/include -depth 1 \\
-         -exec ln -fhs {} ${ENV_ROOT}/include \;
+find ${PY_SYSPREFIX}/include -maxdepth 1 \\
+         -exec ln -fns {} ${ENV_ROOT}/include \;
 
-find ${PY_SYSPREFIX}/lib -depth 1 \\
+find ${PY_SYSPREFIX}/lib -maxdepth 1 \\
          \! -name python${PY_VERSION} \\
-         -exec ln -fhs {} ${ENV_ROOT}/lib \;
+         -exec ln -fns {} ${ENV_ROOT}/lib \;
 
-find ${PY_SYSPREFIX}/lib/python${PY_VERSION} -depth 1 \\
+find ${PY_SYSPREFIX}/lib/python${PY_VERSION} -maxdepth 1 \\
          \! -name site-packages \! -name sitecustomize.\*  \\
-         -exec ln -fhs {} ${ENV_ROOT}/lib/python${PY_VERSION} \;
+         -exec ln -fns {} ${ENV_ROOT}/lib/python${PY_VERSION} \;
 
 ln -s ${ENV_ROOT}/bin/sitecustomize.py ${ENV_ROOT}/lib/python${PY_VERSION}
 """
@@ -187,6 +190,10 @@ if SYSTEM_SITE_PACKAGES:
 """
 
 if __name__ == '__main__':
+
+    print sys.argv 
+    print os.getcwd()
+    print sys.path
 
     path = process_commandline()
     if path:
