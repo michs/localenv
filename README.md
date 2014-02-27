@@ -45,9 +45,8 @@ Rationale
 ---------
 Developed in order to implement a few things in a different way than in [virtualenv](http://www.virtualenv.org).
 
-* User site packages cannot be made available
-* Recursive environments are not possible
-* The used "site.py" differes from the one contained in Python 2.7
+* Make user site packages available
+* Allow recursive environments
+* Use the "site.py" differes coming with Python 2.7
  + Different system site packages on platform 'darwin' appear with and without virtualenv
- + "site-python" cannot be inherited from the system installation
-* Works with [Anaconda](https://store.continuum.io/cshop/anaconda/)
+* Creates environments for [Anaconda](https://store.continuum.io/cshop/anaconda/)
