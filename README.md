@@ -49,6 +49,6 @@ Developed in order to implement a few things in a different way than in [virtual
 
 * Make user site packages available
 * Allow recursive environments
-* Use the "site.py" differes coming with Python 2.7
+* Use the "site.py" coming with Python 2.7
  + Different system site packages on platform 'darwin' appear with and without virtualenv
 * Creates environments for [Anaconda](https://store.continuum.io/cshop/anaconda/)
