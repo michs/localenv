@@ -24,21 +24,23 @@ Creation of a Python environment
 --------------------------------
 
 1. Initialize the environment
-    localpyenv.py -s myenv
+
+    `localpyenv.py -s myenv`
 
 2. Link files from the used parent installation
-    myenv/bin/create_environment.sh
+
+    `myenv/bin/create_environment.sh`
 
 Using a Python environment
 --------------------------
 
 In order to us a Python environment, source its activate script
 
-    source myenv/bin/activate.sh
+    `source myenv/bin/activate.sh`
 
 After the use, deactivate the environment
 
-    deactivate
+    `deactivate`
 
 
 Rationale
