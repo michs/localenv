@@ -36,11 +36,11 @@ Using a Python environment
 
 In order to us a Python environment, source its activate script
 
-    `source myenv/bin/activate.sh`
+    source myenv/bin/activate.sh
 
 After the use, deactivate the environment
 
-    `deactivate`
+    deactivate
 
 
 Rationale
